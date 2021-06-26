@@ -42,17 +42,16 @@ func doTask(ch chan context.Context, parent context.Context,
 	var ctx context.Context
 	//选择 reporter 类别
 	switch traceType {
-	case "Jaeger":
-		log.Println("create jaeger tracing job")
+	case "jaeger":
 		tracer, closer = tracing.InitJaeger(svc)
 		ctx = tracing.AddTracer(svc, parent, header, tracer, tags)
 		break
-	case "Zinkin":
-		log.Println("create zinkin tracing job")
+	case "zipkin":
+		log.Println("create zipkin tracing job")
 		tracer, closer = tracing.InitZipkin(svc)
 		ctx = tracing.AddTracer(svc, parent, header, tracer, tags)
 		break
-	case "SkyWalking":
+	case "skyWalking":
 		log.Println("create skywalking tracing job")
 		break
 	default:
@@ -60,6 +59,5 @@ func doTask(ch chan context.Context, parent context.Context,
 	}
 
 	defer closer.Close()
-	log.Println("tracing job finish ...")
 	ch <- ctx
 }

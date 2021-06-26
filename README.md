@@ -40,32 +40,25 @@ go get github.com/codeandcode0x/traceandtrace-go
 
 ```go
 import (
-    tracing "github.com/codeandcode0x/traceandtrace-go/wrapper/http"
+    tracing "github.com/codeandcode0x/traceandtrace-go"
 )
 
-_, cancel := tracing.AddTracing(r, tags)
+
+// 在 func 中 或者 middleware 中添加
+_, cancel := tracing.AddHttpTracing("HttpTracingTest", http.Header{}, map[string]string{"version": "v1"})
 defer cancel()
 
-//或者 添加自定义 serviceName 
-_, cancel := tracing.AddTracing(r, tags, map[string]string{"serviceName":"your svc name", "traceType":"Jaeger or Zipkin"})
-defer cancel()
-
-...
 ```
 
 - **server 端**
 
 ```go
 import (
-    tracing "github.com/codeandcode0x/traceandtrace-go/wrapper/http"
+    tracing "github.com/codeandcode0x/traceandtrace-go"
 )
 
-pctx, cancel := tracing.AddTracing(r, tags)
-defer cancel()
-//添加 header
-r.Header = header
-//或者 添加自定义 serviceName
-pctx, cancel := tracing.AddTracing(r, tags, map[string]string{"serviceName":"your svc name", "traceType":"Jaeger or Zipkin"})
+// 在 func 中 或者 middleware 中添加
+pctx, cancel := tracing.AddHttpTracing("HttpTracingTest", http.Header{}, map[string]string{"version": "v1"})
 defer cancel()
 
 //pctx 为从根 context 创建子协程会话, 在使用 RPC 请求时将此会话传入
@@ -84,7 +77,7 @@ tags 为 map[string]string 类型, 可以传递 logs k-v, tag 和 field
 
 ```go
 import (
-    tracing "github.com/codeandcode0x/traceandtrace-go/wrapper/rpc"
+    tracing "github.com/codeandcode0x/traceandtrace-go"
 )
 
 //创建 rpc options

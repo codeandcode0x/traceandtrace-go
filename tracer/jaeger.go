@@ -5,6 +5,7 @@ import (
 	logger "log"
 	"net/http"
 	"os"
+	"strconv"
 
 	opentracing "github.com/opentracing/opentracing-go"
 	spanLog "github.com/opentracing/opentracing-go/log"
@@ -27,15 +28,31 @@ type TextMapReader struct {
 
 //初始化 Jaeger
 func InitJaeger(service string) (opentracing.Tracer, io.Closer) {
+	// trace default setting
 	cfg, err := jaegercfg.FromEnv()
 	cfg.Sampler.Type = "const"
 	cfg.Sampler.Param = 1
-	cfg.Reporter.LocalAgentHostPort = "jaeger-production-query.istio-system:6831"
-	//设置 trace agent host
+	cfg.Reporter.LogSpans = false
+	// setting trace sampler type
+	if traceSamplerType := os.Getenv("TRACE_SAMPLER_TYPE"); traceSamplerType != "" {
+		cfg.Sampler.Type = traceSamplerType
+	}
+	// setting trace sampler type param
+	if traceSamplerParam := os.Getenv("TRACE_SAMPLER_PARAM"); traceSamplerParam != "" {
+		cfg.Sampler.Param, _ = strconv.ParseFloat(traceSamplerParam, 10)
+	}
+	// setting trace host
 	if traceAgentHost := os.Getenv("TRACE_AGENT_HOST"); traceAgentHost != "" {
 		cfg.Reporter.LocalAgentHostPort = traceAgentHost
+	} else if traceCollectorEndpoint := os.Getenv("TRACE_ENDPOINT"); traceCollectorEndpoint != "" {
+		// cfg.Reporter.CollectorEndpoint = "http://localhost:14268/api/traces"
+		cfg.Reporter.CollectorEndpoint = traceCollectorEndpoint
 	}
-	cfg.Reporter.LogSpans = true
+
+	if traceLogSpans := os.Getenv("TRACE_REPORTER_LOG_SPANS"); traceLogSpans != "" {
+		cfg.Reporter.LogSpans, _ = strconv.ParseBool(traceLogSpans)
+	}
+
 	tracer, closer, err := cfg.New(service, jaegercfg.Logger(jaeger.StdLogger))
 	if err != nil {
 		logger.Fatalln("cannot init Jaeger", err)
@@ -56,7 +73,11 @@ func WriteSubSpan(span opentracing.Span, subSpanName string) {
 }
 
 // TracerWrapper tracer wrapper
-func AddTracer(svcName string, ctx context.Context, header http.Header, tracer opentracing.Tracer, tags map[string]string) context.Context {
+func AddTracer(svcName string,
+	ctx context.Context,
+	header http.Header,
+	tracer opentracing.Tracer,
+	tags map[string]string) context.Context {
 	//初始化 tracer
 	opentracing.InitGlobalTracer(tracer)
 	var sp opentracing.Span
@@ -71,8 +92,6 @@ func AddTracer(svcName string, ctx context.Context, header http.Header, tracer o
 	}
 	//写入 tag 或者 日志
 	for k, v := range tags {
-		// sp.LogKV(k, v)
-		// sp.SetTag(k, v)
 		sp.LogFields(
 			spanLog.String(k, v),
 		)
