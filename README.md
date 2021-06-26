@@ -17,7 +17,8 @@ docker run \
 -p 6832:6832/udp \
 -p 5778:5778 \
 -p 14268:14268 \
-jaegertracing/all-in-one:latest
+ethansmart-docker.pkg.coding.net/istioalltime/roandocker/jaegertracing-all-in-one:1.22.0
+
 ```
 
 ### 引入 SDK 包
