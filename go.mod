@@ -1,4 +1,4 @@
-module traceandtrace-go
+module github.com/codeandcode0x/traceandtrace-go
 
 go 1.14
 
