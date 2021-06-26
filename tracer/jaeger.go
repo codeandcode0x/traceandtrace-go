@@ -56,18 +56,18 @@ func WriteSubSpan(span opentracing.Span, subSpanName string) {
 }
 
 // TracerWrapper tracer wrapper
-func AddTracer(ctx context.Context, r *http.Request, tracer opentracing.Tracer, tags map[string]string) context.Context {
+func AddTracer(svcName string, ctx context.Context, header http.Header, tracer opentracing.Tracer, tags map[string]string) context.Context {
 	//初始化 tracer
 	opentracing.InitGlobalTracer(tracer)
 	var sp opentracing.Span
 	//从 header 中获取 span
 	spanCtx, _ := opentracing.GlobalTracer().Extract(opentracing.HTTPHeaders,
-		opentracing.HTTPHeadersCarrier(r.Header))
+		opentracing.HTTPHeadersCarrier(header))
 	if spanCtx != nil {
-		sp = opentracing.GlobalTracer().StartSpan(r.URL.Path, opentracing.ChildOf(spanCtx))
+		sp = opentracing.GlobalTracer().StartSpan(svcName, opentracing.ChildOf(spanCtx))
 	} else {
 		//如果 header 中没有携带 context, 则新建 span
-		sp = tracer.StartSpan(r.URL.Path)
+		sp = tracer.StartSpan(svcName)
 	}
 	//写入 tag 或者 日志
 	for k, v := range tags {
@@ -81,7 +81,7 @@ func AddTracer(ctx context.Context, r *http.Request, tracer opentracing.Tracer, 
 	if err := opentracing.GlobalTracer().Inject(
 		sp.Context(),
 		opentracing.HTTPHeaders,
-		opentracing.HTTPHeadersCarrier(r.Header)); err != nil {
+		opentracing.HTTPHeadersCarrier(header)); err != nil {
 		logger.Fatalln("inject failed", err)
 	}
 	//关闭连接
