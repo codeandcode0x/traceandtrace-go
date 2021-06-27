@@ -45,7 +45,7 @@ import (
 
 
 // 在 func 中 或者 middleware 中添加
-_, cancel := tracing.AddHttpTracing("HttpTracingTest", http.Header{}, map[string]string{"version": "v1"})
+_, cancel := tracing.AddHttpTracing("HttpTracingTest", [your http Header], map[string]string{"version": "v1"})
 defer cancel()
 
 ```
@@ -58,12 +58,8 @@ import (
 )
 
 // 在 func 中 或者 middleware 中添加
-pctx, cancel := tracing.AddHttpTracing("HttpTracingTest", http.Header{}, map[string]string{"version": "v1"})
+_, cancel := tracing.AddHttpTracing("HttpTracingTest", [your http Header], map[string]string{"version": "v1"})
 defer cancel()
-
-//pctx 为从根 context 创建子协程会话, 在使用 RPC 请求时将此会话传入
-//可以实现 http 到 rpc span 的传递 
-RpcRequestMethod(pctx)
 
 ...
 ```
@@ -81,7 +77,7 @@ import (
 )
 
 //创建 rpc options
-rpcOption, closer, _ := tracing.AddTracing(serviceName)
+rpcOption, closer := tracing.AddRpcClientTracing("RpcClientExample")
 defer closer.Close()
 
 //dial
@@ -117,6 +113,10 @@ newRpcServiceReq(tracer)
 
 ...
 ```
+
+### Http to gRPC 链路
+![http to grpc client](wiki/imgs/httptogrpc_client.jpg)
+在 http server 端调用 gRPC, 需要在 rpc client 中加入 parent context, 详情可以查看 example 中的示例
 
 ## 并发处理
 ### 协程 context 管理

@@ -45,6 +45,7 @@ func RpcClient(ptx context.Context) string {
 	if len(os.Args) > 1 {
 		name = os.Args[1]
 	}
+	// use parent context
 	ctx, cancel := context.WithTimeout(ptx, time.Second)
 	defer cancel()
 	r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
