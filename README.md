@@ -1,20 +1,20 @@
-# 微服务架构 —— 分布式链路追踪
+# MSA Distributed link tracking
+微服务架构 —— 分布式链路追踪
 
-## 简介
-traceandtrace-go 是 go 语言 tracing lib, 可以集成不同的 tracer 如: jeager、zipkin、skywalking ... <br>
+## Introduction
+traceandtrace-go is go tracing lib. It integrate multi tracer such as jeager,zipkin,skywalking and so on <br>
 
-## 版本介绍
-- v1.0.0 目前只支持 jeager 
-- 支持 http 和 gRPC (or both) 调用链路
-- 支持采样率、采样类型、收集器等配置
+## Version introduction
+- v1.0.0 only support jeager 
+- support http and gRPC (or both) tracing
+- support sampler, sampler type and collector env setting
 
 ## API
 
 
+## quick start
 
-## 快速开始
-
-### 启动 Jaeger
+### start jaeger
 
 ```shell
 docker run \
@@ -28,89 +28,62 @@ ethansmart-docker.pkg.coding.net/istioalltime/roandocker/jaegertracing-all-in-on
 
 ```
 
-### 引入 SDK 包
+### import package
 
 ```shell
 go get github.com/codeandcode0x/traceandtrace-go
 ```
 
+### HTTP tracing
+
+Create a trace on the http request method side.
+![http to grpc client](wiki/imgs/http_client.jpg)
+tags are map[string]string type, you can pass logs k-v, tag and field.
 
 
-### HTTP 请求链路
-在 http request 方法侧创建 trace
+### RPC tracing
+Create a trace on the rpc request method side
 
-代码如下:
-- **client 端**
-
-```go
-import (
-    tracing "github.com/codeandcode0x/traceandtrace-go"
-)
-
-
-// 在 func 中 或者 middleware 中添加
-_, cancel := tracing.AddHttpTracing("HttpTracingTest", [your http Header], map[string]string{"version": "v1"})
-defer cancel()
-
-```
-
-- **server 端**
+- **client**
 
 ```go
 import (
     tracing "github.com/codeandcode0x/traceandtrace-go"
 )
 
-// 在 func 中 或者 middleware 中添加
-_, cancel := tracing.AddHttpTracing("HttpTracingTest", [your http Header], map[string]string{"version": "v1"})
-defer cancel()
-
-...
-```
-tags 为 map[string]string 类型, 可以传递 logs k-v, tag 和 field 
-
-
-### RPC 请求链路
-在 rpc request 方法侧创建 trace
-
-- **client 端**
-
-```go
-import (
-    tracing "github.com/codeandcode0x/traceandtrace-go"
-)
-
-//创建 rpc options
+// create rpc options
 rpcOption, closer := tracing.AddRpcClientTracing("RpcClientExample")
 defer closer.Close()
 
-//dial
+// dial
 conn, err := grpc.Dial(addr, grpc.WithInsecure(), rpcOption)
 if err != nil {
 }
 ...
 ```
-- **server 端**
+- **server**
 
 ```go
 import (
     tracing "github.com/codeandcode0x/traceandtrace-go/wrapper/rpc"
 )
 
-//不需要请求别的 rpc 服务
+//No need to request other rpc services
 rpcOption, closer, _ := rpcTracing.AddRpcServerTracing(serviceName)
 defer closer.Close()
 
-//在 server 端监听进程中加入 rpcOptions 即可
+//Add rpcOptions to the server-side monitoring process
 s := grpc.NewServer(rpcOption)
 
-//------------------------------------------------
+```
 
-//需要请求别的 rpc 服务
+Need to request another rpc service
+
+```go
 rpcOption, closer, tracer := rpcTracing.AddRpcServerTracing(serviceName)
 defer closer.Close()
 
-//在 server 端监听进程中加入 rpcOptions 即可
+//Add rpcOptions to the server-side monitoring process
 s := grpc.NewServer(rpcOption)
 //rpc 请求
 newRpcServiceReq(tracer)
@@ -118,32 +91,32 @@ newRpcServiceReq(tracer)
 ...
 ```
 
-### Http to gRPC 链路
+### Http to gRPC tracing
 ![http to grpc client](wiki/imgs/httptogrpc_client.jpg)
-在 http server 端调用 gRPC, 需要在 rpc client 中加入 parent context, 详情可以查看 example 中的示例
+To call gRPC on the http server side, you need to add the parent context to the rpc client. For details, you can see the [example](example/http/httpServer.go) .
 
-## 并发处理
-### 协程 context 管理
+## Concurrent Processing
+### goroutine context control
 
-- 通过 context.Background() 创建子协程 context, 形成会话树 (协程树), 是线程安全的 (不存在数据竞争问题) ;
-- 通过 context WithCancel() 创建子协程会话, 管理协程任务 ;
-- 每个 context 会携带父类 trace 和 子 span 的相关 data
+- By context.Background() create sub-coroutine context, form a session tree (coroutine tree), which is thread-safe (there is no data race problem) ;
+- By context WithCancel() create sub-coroutine sessions and manage coroutine tasks ;
+- every context will carry related data of parent trace and child span ;
 
-![goroutine 会话](https://images2018.cnblogs.com/blog/1048291/201806/1048291-20180629074859717-1555813847.png)
+![goroutine session](https://images2018.cnblogs.com/blog/1048291/201806/1048291-20180629074859717-1555813847.png)
 
-### 协程 trace job 管理和资源回收
-启动和暂停 trace job
+### trace job control
+start and end trace job
 
 ```go
-//启动协程 job
+// start job
 ch := make(chan context.Context, 0)
 go doTask(ch, ctx, r, svc, traceType, tags)
 
-//任务结束 (接受信号)
+// end job (receive signal)
 pctx := <-ch
 pch <- pctx
 
-//资源回收 (暂停任务)
+// release job
 for {
     select {
         case <-ctx.Done():
