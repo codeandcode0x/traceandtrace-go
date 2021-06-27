@@ -16,6 +16,16 @@ traceandtrace-go is go tracing lib. It integrate multi tracer such as jeager,zip
 ## API
 [godoc](https://pkg.go.dev/github.com/codeandcode0x/traceandtrace-go)
 
+## Env Setting
+
+|  Env   | Value  |
+|  ----  | ----  |
+|  TRACE_SAMPLER_TYPE  | const/probabilistic/ratelimiting/remote  |
+|  TRACE_SAMPLER_PARAM  | 0-1  |
+|  TRACE_ENDPOINT  | http://localhost:14268/api/traces  |
+|  TRACE_AGENT_HOST  | localhost:6831  |
+|  TRACE_REPORTER_LOG_SPANS  | false/ture  |
+ 
 ## Ext field
 spanKind <br>
 component <br>
