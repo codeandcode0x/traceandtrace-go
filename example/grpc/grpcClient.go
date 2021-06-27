@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
 	"os"
 	"time"
 
@@ -13,24 +12,14 @@ import (
 )
 
 func main() {
-	httpExample()
 	gRPCExample()
-}
-
-// http tracing example
-func httpExample() {
-	_, cancel := tracing.AddHttpTracing(
-		"HttpTracingTest",
-		http.Header{},
-		map[string]string{"version": "v1"})
-	defer cancel()
 }
 
 // gRPC tracing example
 func gRPCExample() {
 	address := "localhost:22530"
 	defaultName := "ethan"
-	rpcOption, closer := tracing.AddRpcClientTracing("RpcClientTest")
+	rpcOption, closer := tracing.AddRpcClientTracing("RpcClientExample")
 	defer closer.Close()
 
 	// Set up a connection to the server.
