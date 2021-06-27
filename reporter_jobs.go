@@ -1,18 +1,19 @@
-/** Package traceandtrace-go 是 go 语言 tracing lib, 可以集成不同的 tracer 如: jeager、zipkin、skywalking 等
-reporter_job 可以对 tracing 数据上报，做了性能优化，做到业务侵入小, 高性能等。
+/** Package traceandtrace-go is the go language tracing lib, which can integrate different tracers such as: jeager, zipkin, skywalking, etc.
+reporter_job can report tracing data and optimize performance to achieve low business intrusion and high performance.
 
-// 快速上手
+// quick start
 	import (
     	tracing "github.com/codeandcode0x/traceandtrace-go"
 	)
 
-	// 在 func 中 或者 middleware 中添加
+	// Add in func or middleware
 	_, cancel := tracing.AddHttpTracing("HttpTracingTest", [your http Header], map[string]string{"version": "v1"})
 	defer cancel()
 
 	...
 
-	reporter_job 对上报 tracing 数据进行了优化 (采用携程任务处理),对业务侵入小，高性能上报,job 结束后, 可以对资源进行释放。
+	reporter_job optimizes the reported tracing data (using goroutine processing), has little business intrusion, and reports with high performance.
+	After the job ends, resources can be released.
 */
 package traceandtracego
 
@@ -28,15 +29,15 @@ import (
 
 //generate trace jobs (goroutine), use context and chan to control jobs and release goroutine .
 func GenerateTracingJobs(pch chan<- context.Context, parent context.Context, svc string, header http.Header, tags map[string]string, traceType string) {
-	//设置 context
+	// setting context
 	ctx, cancel := context.WithCancel(parent)
-	//设置通道
+	// setting chan
 	ch := make(chan context.Context, 0)
 	go doTask(ch, ctx, svc, header, tags, traceType)
-	//接受信号
+	// receive signal
 	pctx := <-ch
 	pch <- pctx
-	//销毁资源
+	// destroy resources
 	for {
 		select {
 		case <-ctx.Done():
@@ -48,14 +49,14 @@ func GenerateTracingJobs(pch chan<- context.Context, parent context.Context, svc
 	}
 }
 
-//执行 trace reporter
+// do trace reporter
 func doTask(ch chan context.Context, parent context.Context,
 	svc string, header http.Header, tags map[string]string, traceType string) {
 	//定义 tracer, closer
 	var tracer opentracing.Tracer
 	var closer io.Closer
 	var ctx context.Context
-	//选择 reporter 类别
+	// select reporter type
 	switch traceType {
 	case "jaeger":
 		tracer, closer = tracing.InitJaeger(svc)
