@@ -17,23 +17,23 @@ traceandtrace-go is go tracing lib. It integrate multi tracer such as jeager,zip
 [godoc](https://pkg.go.dev/github.com/codeandcode0x/traceandtrace-go)
 
 ## Ext field
-spanKind
-component
-samplingPriority
-peerService
-peerAddress
-peerHostname
-peerIpv4
-peerIpv6
-peerPort
-httpUrl
-httpStatusCode
-dbStatement
-dbInstance
-dbType
-httpMethod
-dbUser
-messageBusDestination
+spanKind <br>
+component <br>
+samplingPriority <br>
+peerService <br>
+peerAddress <br>
+peerHostname <br>
+peerIpv4 <br>
+peerIpv6 <br>
+peerPort <br>
+httpUrl <br>
+httpStatusCode <br>
+dbStatement <br>
+dbInstance <br>
+dbType <br>
+httpMethod <br>
+dbUser <br>
+messageBusDestination <br>
 
 ## quick start
 
