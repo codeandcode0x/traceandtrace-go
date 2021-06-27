@@ -14,7 +14,7 @@ traceandtrace-go is go tracing lib. It integrate multi tracer such as jeager,zip
 - support sampler, sampler type and collector env setting
 
 ## API
-
+[godoc](https://pkg.go.dev/github.com/codeandcode0x/traceandtrace-go)
 
 ## quick start
 
