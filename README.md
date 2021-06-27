@@ -1,3 +1,7 @@
+[![Go doc](https://img.shields.io/badge/go.dev-reference-brightgreen?logo=go&logoColor=white&style=flat)](https://pkg.go.dev/github.com/codeandcode0x/traceandtrace-go)
+![Gitter](https://img.shields.io/gitter/room/codeandcode0x/traceandtrace-go)
+
+
 # MSA Distributed link tracking
 微服务架构 —— 分布式链路追踪
 
