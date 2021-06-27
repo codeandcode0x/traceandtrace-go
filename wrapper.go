@@ -14,15 +14,11 @@ import (
 const (
 	JAEGER_TRACER     = "jaeger"
 	ZIPKIN_TRACER     = "zipkin"
-	SKYWALKING_TRACER = "skyWalking"
+	SKYWALKING_TRACER = "skywalking"
 )
 
-//add tracing
-func AddHttpTracing(
-	svcName string,
-	header http.Header,
-	tags map[string]string,
-	param ...map[string]string) (context.Context, context.CancelFunc) {
+// Add http tracing , tags is k-v map which can set in span log, param map can set trace type .
+func AddHttpTracing(svcName string, header http.Header, tags map[string]string, param ...map[string]string) (context.Context, context.CancelFunc) {
 	// 定义 trace type
 	var traceType string
 	//启动 trace 任务
@@ -30,7 +26,7 @@ func AddHttpTracing(
 	//创建通道
 	ch := make(chan context.Context, 0)
 	//选择类型和服务
-	traceType = JAEGER_TRACER
+	ç = JAEGER_TRACER
 	if len(param) > 0 {
 		if _, exist := param[0]["traceType"]; exist {
 			traceType = strings.ToLower(param[0]["traceType"])
@@ -43,7 +39,7 @@ func AddHttpTracing(
 }
 
 //add rpc client tracing
-func AddRpcClientTracing(serviceName string) (grpc.DialOption, io.Closer) {
+func AddRpcClientTracing(serviceName string, param ...map[string]string) (grpc.DialOption, io.Closer) {
 	//初始化 jaeger
 	tracer, closer := tracing.InitJaeger(serviceName)
 	//返回 rpc options
@@ -51,19 +47,9 @@ func AddRpcClientTracing(serviceName string) (grpc.DialOption, io.Closer) {
 }
 
 //add rpc server tracing
-func AddRpcServerTracing(serviceName string) (grpc.ServerOption, io.Closer, opentracing.Tracer) {
+func AddRpcServerTracing(serviceName string, param ...map[string]string) (grpc.ServerOption, io.Closer, opentracing.Tracer) {
 	//初始化 jaeger
 	tracer, closer := tracing.InitJaeger(serviceName)
 	//返回 rpc options
 	return tracing.ServerDialOption(tracer), closer, tracer
-}
-
-//zipkin
-func AddZipkinTracer(serviceName string) {
-	//TO-DO
-}
-
-//skywalking
-func AddSkyWalkingTracer(serviceName string) {
-	//TO-DO
 }

@@ -1,13 +1,20 @@
-微服务架构 —— 分布式链路追踪
+# 微服务架构 —— 分布式链路追踪
 
-# Tracing SDK
+## 简介
+traceandtrace-go 是 go 语言 tracing lib, 可以集成不同的 tracer 如: jeager、zipkin、skywalking ... <br>
 
-Go、Java Tracing SDK
+## 版本介绍
+- v1.0.0 目前只支持 jeager 
+- 支持 http 和 gRPC (or both) 调用链路
+- 支持采样率、采样类型、收集器等配置
+
+## API
+
 
 
 ## 快速开始
 
-### 启动 Jaeger or Zipkin
+### 启动 Jaeger
 
 ```shell
 docker run \
@@ -26,11 +33,8 @@ ethansmart-docker.pkg.coding.net/istioalltime/roandocker/jaegertracing-all-in-on
 ```shell
 go get github.com/codeandcode0x/traceandtrace-go
 ```
-或者
 
-```shell
-go get github.com/codeandcode0x/traceandtrace-go
-```
+
 
 ### HTTP 请求链路
 在 http request 方法侧创建 trace
