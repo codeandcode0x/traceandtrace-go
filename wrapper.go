@@ -17,7 +17,7 @@ const (
 	SKYWALKING_TRACER = "skywalking"
 )
 
-// Add http tracing , tags is k-v map which can set in span log, param map can set trace type .
+//Add http tracing , tags is k-v map which can set in span log, param map can set trace type .
 func AddHttpTracing(svcName string, header http.Header, tags map[string]string, param ...map[string]string) (context.Context, context.CancelFunc) {
 	// 定义 trace type
 	var traceType string
@@ -26,7 +26,7 @@ func AddHttpTracing(svcName string, header http.Header, tags map[string]string, 
 	//创建通道
 	ch := make(chan context.Context, 0)
 	//选择类型和服务
-	ç = JAEGER_TRACER
+	traceType = JAEGER_TRACER
 	if len(param) > 0 {
 		if _, exist := param[0]["traceType"]; exist {
 			traceType = strings.ToLower(param[0]["traceType"])
