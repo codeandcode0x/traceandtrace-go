@@ -75,7 +75,7 @@ func WriteSubSpan(span opentracing.Span, subSpanName string) {
 }
 
 // TracerWrapper tracer wrapper
-func AddTracer(svcName string,
+func AddTracer(svcName, spanName string,
 	ctx context.Context,
 	header http.Header,
 	tracer opentracing.Tracer,
@@ -87,10 +87,10 @@ func AddTracer(svcName string,
 	spanCtx, _ := opentracing.GlobalTracer().Extract(opentracing.HTTPHeaders,
 		opentracing.HTTPHeadersCarrier(header))
 	if spanCtx != nil {
-		sp = opentracing.GlobalTracer().StartSpan(svcName, opentracing.ChildOf(spanCtx))
+		sp = opentracing.GlobalTracer().StartSpan(spanName, opentracing.ChildOf(spanCtx))
 	} else {
 		//如果 header 中没有携带 context, 则新建 span
-		sp = tracer.StartSpan(svcName)
+		sp = tracer.StartSpan(spanName)
 	}
 	//写入 tag 或者 日志
 	for k, v := range tags {

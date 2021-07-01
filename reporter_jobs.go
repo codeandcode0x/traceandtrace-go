@@ -28,12 +28,12 @@ import (
 )
 
 //generate trace jobs (goroutine), use context and chan to control jobs and release goroutine .
-func GenerateTracingJobs(pch chan<- context.Context, parent context.Context, svc string, header http.Header, tags map[string]string, traceType string) {
+func GenerateTracingJobs(pch chan<- context.Context, parent context.Context, svc, spanName string, header http.Header, tags map[string]string, traceType string) {
 	// setting context
 	ctx, cancel := context.WithCancel(parent)
 	// setting chan
 	ch := make(chan context.Context, 0)
-	go doTask(ch, ctx, svc, header, tags, traceType)
+	go doTask(ch, ctx, svc, spanName, header, tags, traceType)
 	// receive signal
 	pctx := <-ch
 	pch <- pctx
@@ -51,7 +51,7 @@ func GenerateTracingJobs(pch chan<- context.Context, parent context.Context, svc
 
 // do trace reporter
 func doTask(ch chan context.Context, parent context.Context,
-	svc string, header http.Header, tags map[string]string, traceType string) {
+	svc, spanName string, header http.Header, tags map[string]string, traceType string) {
 	//定义 tracer, closer
 	var tracer opentracing.Tracer
 	var closer io.Closer
@@ -60,7 +60,7 @@ func doTask(ch chan context.Context, parent context.Context,
 	switch traceType {
 	case "jaeger":
 		tracer, closer = tracing.InitJaeger(svc)
-		ctx = tracing.AddTracer(svc, parent, header, tracer, tags)
+		ctx = tracing.AddTracer(svc, spanName, parent, header, tracer, tags)
 		break
 	case "zipkin":
 		log.Println("create zipkin tracing job")

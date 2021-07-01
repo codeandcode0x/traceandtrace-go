@@ -18,7 +18,7 @@ const (
 )
 
 //Add http tracing , tags is k-v map which can set in span log, param map can set trace type .
-func AddHttpTracing(svcName string, header http.Header, tags map[string]string, param ...map[string]string) (context.Context, context.CancelFunc) {
+func AddHttpTracing(svcName, spanName string, header http.Header, tags map[string]string, param ...map[string]string) (context.Context, context.CancelFunc) {
 	// 定义 trace type
 	var traceType string
 	//启动 trace 任务
@@ -33,7 +33,7 @@ func AddHttpTracing(svcName string, header http.Header, tags map[string]string, 
 		}
 	}
 	//创建任务
-	go GenerateTracingJobs(ch, ctx, svcName, header, tags, traceType)
+	go GenerateTracingJobs(ch, ctx, svcName, spanName, header, tags, traceType)
 	//返回通道
 	return <-ch, cancel
 }
