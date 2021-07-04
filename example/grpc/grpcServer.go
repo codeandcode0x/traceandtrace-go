@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	pb "github.com/codeandcode0x/traceandtrace-go/example/helloworld/proto"
+	pb "github.com/codeandcode0x/traceandtrace-go/example/protos/helloworld"
 
 	tracing "github.com/codeandcode0x/traceandtrace-go"
 	opentracing "github.com/opentracing/opentracing-go"

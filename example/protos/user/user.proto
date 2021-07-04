@@ -1,0 +1,16 @@
+syntax = "proto3";
+package movie;
+option go_package = "./";
+
+
+message UserMsgRequest {
+    int32 count = 1;
+}
+
+message UserMsgReply {
+    string message = 1;
+}
+
+service UserRPC {
+    rpc GetAllUsers (UserMsgRequest) returns (UserMsgReply){}
+}

@@ -20,6 +20,7 @@ func main() {
 // http to gRPC
 func httpServer() {
 	http.HandleFunc("/rpc/tracing", func(w http.ResponseWriter, r *http.Request) {
+		log.Println(".............. header ", r.Header)
 		pctx, cancel := tracing.AddHttpTracing("HttpServer", "/rpc/tracing GET", r.Header, map[string]string{"version": "v1"})
 		defer cancel()
 		// rpc tracing

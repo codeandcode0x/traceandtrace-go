@@ -7,7 +7,7 @@ import (
 	"time"
 
 	tracing "github.com/codeandcode0x/traceandtrace-go"
-	pb "github.com/codeandcode0x/traceandtrace-go/example/helloworld/proto"
+	pb "github.com/codeandcode0x/traceandtrace-go/example/protos/helloworld"
 	"google.golang.org/grpc"
 )
 
