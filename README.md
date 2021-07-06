@@ -9,12 +9,13 @@
 traceandtrace-go is go tracing lib. It integrate multi tracer such as jeager,zipkin,skywalking and so on <br>
 
 ## Version introduction
-- v1.0.0 only support jeager 
+### v1.0.0
+- only support jeager 
 - support http and gRPC (or both) tracing
 - support sampler, sampler type and collector env setting
 
-## Version introduction
-- v1.0.3 support jeager and zipkin
+### v1.0.3
+- support jeager and zipkin
 
 ## API
 [godoc](https://pkg.go.dev/github.com/codeandcode0x/traceandtrace-go)
@@ -82,7 +83,7 @@ Create a trace on the http request method side.
 tags are map[string]string type, you can pass logs k-v, tag and field.
 
 
-### RPC tracing
+### gRPC tracing
 Create a trace on the rpc request method side
 
 **client**
@@ -133,8 +134,40 @@ newRpcServiceReq(tracer)
 ```
 
 ### Http to gRPC tracing
-![http to grpc client](wiki/imgs/httptogrpc_client.jpg)
-To call gRPC on the http server side, you need to add the parent context to the rpc client. For details, you can see the [example](example/http/httpServer.go) .
+```go
+//grpc request
+func RpcClient(ptx context.Context) string {
+	rpcOption, closer := tracing.AddRpcClientTracing(
+		"RpcClient",
+		map[string]string{"version": "v1"})
+    // or map[string]string{"traceType": "zipkin", "version": "v1"}), traceType : jaeger (default) or zipkin
+	// or export TRACE_TYPE=zipkin or jaeger
+	defer closer.Close()
+	address := "localhost:22530"
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), rpcOption)
+	if err != nil {
+	}
+	defer conn.Close()
+	c := pb.NewGreeterClient(conn)
+	// Contact the server and print out its response.
+	name := "rpc test"
+	if len(os.Args) > 1 {
+		name = os.Args[1]
+	}
+	// use parent context
+	ctx, cancel := context.WithTimeout(ptx, time.Second)
+	defer cancel()
+	r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
+	if err != nil {
+		log.Println("error:", err)
+	}
+
+	log.Printf("Greeting: %s", r.Message)
+	return r.Message
+}
+```
+**ptx** is parent context, it can create sub-context trace span <br>
+To call gRPC on the http server side, you need to add the parent context to the gRPC client. For details, you can see the [example](example/http/httpServer.go) .
 
 ## Concurrent Processing
 ### goroutine context control
