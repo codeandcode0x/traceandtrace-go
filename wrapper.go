@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 
 	tracing "github.com/codeandcode0x/traceandtrace-go/tracer"
@@ -19,37 +20,38 @@ const (
 
 //Add http tracing , tags is k-v map which can set in span log, param map can set trace type .
 func AddHttpTracing(svcName, spanName string, header http.Header, tags map[string]string, param ...map[string]string) (context.Context, context.CancelFunc) {
-	// 定义 trace type
+	//trace type
 	var traceType string
-	//启动 trace 任务
+	//start trace task
 	ctx, cancel := context.WithCancel(context.Background())
-	//创建通道
+	//create chan
 	ch := make(chan context.Context, 0)
-	//选择类型和服务
+	//trace type
 	traceType = JAEGER_TRACER
-	if len(param) > 0 {
-		if _, exist := param[0]["traceType"]; exist {
-			traceType = strings.ToLower(param[0]["traceType"])
-		}
+	//get trace type env
+	if tType := os.Getenv("TRACE_TYPE"); tType != "" {
+		traceType = tType
+	} else if _, exist := tags["traceType"]; exist {
+		traceType = strings.ToLower(tags["traceType"])
 	}
-	//创建任务
+	//create goroutine job
 	go GenerateTracingJobs(ch, ctx, svcName, spanName, header, tags, traceType)
-	//返回通道
+	//return chan
 	return <-ch, cancel
 }
 
 //add rpc client tracing
 func AddRpcClientTracing(serviceName string, param ...map[string]string) (grpc.DialOption, io.Closer) {
-	//初始化 jaeger
-	tracer, closer := tracing.InitJaeger(serviceName)
-	//返回 rpc options
+	//init tracer
+	tracer, closer := SelectInitTracer(serviceName, param...)
+	//return rpc options
 	return tracing.ClientDialOption(tracer), closer
 }
 
 //add rpc server tracing
 func AddRpcServerTracing(serviceName string, param ...map[string]string) (grpc.ServerOption, io.Closer, opentracing.Tracer) {
-	//初始化 jaeger
-	tracer, closer := tracing.InitJaeger(serviceName)
-	//返回 rpc options
+	//init jaeger
+	tracer, closer := SelectInitTracer(serviceName, param...)
+	//return rpc options
 	return tracing.ServerDialOption(tracer), closer, tracer
 }

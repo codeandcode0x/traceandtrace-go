@@ -19,7 +19,9 @@ func main() {
 func gRPCExample() {
 	address := "localhost:22530"
 	defaultName := "ethan"
-	rpcOption, closer := tracing.AddRpcClientTracing("RpcClientExample")
+	rpcOption, closer := tracing.AddRpcClientTracing(
+		"RpcClientExample",
+		map[string]string{"version": "v1"})
 	defer closer.Close()
 
 	// Set up a connection to the server.

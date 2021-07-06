@@ -20,7 +20,12 @@ func httpClient() {
 	httpClient := &http.Client{}
 	r, _ := http.NewRequest("GET", httpTogRPCSrcUrl, nil)
 	// set tracing
-	_, cancel := tracing.AddHttpTracing("HttpClent", "rpc/tracing GET", r.Header, map[string]string{"version": "v1"})
+	_, cancel := tracing.AddHttpTracing(
+		"HttpClient",
+		"/rpc/tracing GET", r.Header,
+		map[string]string{"version": "v1"})
+	// or map[string]string{"traceType": "zipkin", "version": "v1"}), traceType : jaeger (default) or zipkin
+	// or export TRACE_TYPE=zipkin or jaeger
 	defer cancel()
 	// send reqeust
 	response, _ := httpClient.Do(r)

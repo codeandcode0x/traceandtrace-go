@@ -22,6 +22,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 
 	tracing "github.com/codeandcode0x/traceandtrace-go/tracer"
 	opentracing "github.com/opentracing/opentracing-go"
@@ -52,18 +54,39 @@ func GenerateTracingJobs(pch chan<- context.Context, parent context.Context, svc
 // do trace reporter
 func doTask(ch chan context.Context, parent context.Context,
 	svc, spanName string, header http.Header, tags map[string]string, traceType string) {
-	//定义 tracer, closer
+	//define tracer, closer
 	var tracer opentracing.Tracer
 	var closer io.Closer
 	var ctx context.Context
+	//init tracer
+	tracer, closer = SelectInitTracer(svc, map[string]string{"traceType": traceType})
+	ctx = tracing.AddHttpTracer(svc, spanName, parent, header, tracer, tags)
+	//close
+	defer closer.Close()
+	ch <- ctx
+}
+
+//select init tracer
+func SelectInitTracer(svc string, param ...map[string]string) (opentracing.Tracer, io.Closer) {
+	var tracer opentracing.Tracer
+	var closer io.Closer
+	// get tracer type
+	traceType := JAEGER_TRACER
+	if tType := os.Getenv("TRACE_TYPE"); tType != "" {
+		traceType = tType
+	} else if len(param) > 0 {
+		if _, exist := param[0]["traceType"]; exist {
+			traceType = strings.ToLower(param[0]["traceType"])
+		}
+	}
+
 	// select reporter type
 	switch traceType {
 	case "jaeger":
 		tracer, closer = tracing.InitJaeger(svc)
-		ctx = tracing.AddTracer(svc, spanName, parent, header, tracer, tags)
 		break
 	case "zipkin":
-		log.Println("create zipkin tracing job")
+		tracer, closer = tracing.InitZipkin(svc)
 		break
 	case "skywalking":
 		log.Println("create skywalking tracing job")
@@ -71,7 +94,6 @@ func doTask(ch chan context.Context, parent context.Context,
 	default:
 		break
 	}
-
-	defer closer.Close()
-	ch <- ctx
+	//return
+	return tracer, closer
 }
