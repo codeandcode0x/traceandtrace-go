@@ -38,6 +38,8 @@ func RpcClient(ptx context.Context) string {
 	rpcOption, closer := tracing.AddRpcClientTracing(
 		"RpcClient",
 		map[string]string{"version": "v1"})
+	// or map[string]string{"traceType": "zipkin", "version": "v1"}), traceType : jaeger (default) or zipkin
+	// or export TRACE_TYPE=zipkin or jaeger
 	defer closer.Close()
 	address := "localhost:22530"
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), rpcOption)
