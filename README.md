@@ -13,6 +13,9 @@ traceandtrace-go is go tracing lib. It integrate multi tracer such as jeager,zip
 - support http and gRPC (or both) tracing
 - support sampler, sampler type and collector env setting
 
+## Version introduction
+- v1.0.3 support jeager and zipkin
+
 ## API
 [godoc](https://pkg.go.dev/github.com/codeandcode0x/traceandtrace-go)
 
@@ -22,11 +25,12 @@ traceandtrace-go is go tracing lib. It integrate multi tracer such as jeager,zip
 |  ----  | ----  |
 |  TRACE_SAMPLER_TYPE  | const/probabilistic/ratelimiting/remote  |
 |  TRACE_SAMPLER_PARAM  | 0-1  |
-|  TRACE_ENDPOINT  | http://localhost:14268/api/traces  |
-|  TRACE_AGENT_HOST  | localhost:6831  |
-|  TRACE_REPORTER_LOG_SPANS  | false/ture  |
+|  TRACE_ENDPOINT  | http://localhost:14268/api/traces (jaeger) or http://localhost:9411/api/v2/spans (zipkin) |
+|  TRACE_AGENT_HOST  | localhost:6831 (jaeger) |
+|  TRACE_REPORTER_LOG_SPANS  | false or ture  |
+|  TRACE_TYPE  | jaeger or zipkin  |
  
-## Ext field
+## Jaeger Ext field
 spanKind <br>
 component <br>
 samplingPriority <br>
@@ -45,23 +49,27 @@ httpMethod <br>
 dbUser <br>
 messageBusDestination <br>
 
-## quick start
+## Quick Start
 
-### start jaeger
+### Start Jaeger
 
 ```shell
-docker run \
+docker run -d --name jaeger \
+-e COLLECTOR_ZIPKIN_HOST_PORT=:9411 \
 -p 5775:5775/udp \
--p 16686:16686 \
 -p 6831:6831/udp \
 -p 6832:6832/udp \
 -p 5778:5778 \
+-p 16686:16686 \
 -p 14268:14268 \
+-p 14250:14250 \
+-p 9411:9411 \
 ethansmart-docker.pkg.coding.net/istioalltime/roandocker/jaegertracing-all-in-one:1.22.0
+
 
 ```
 
-### import package
+### Import Package
 
 ```shell
 go get github.com/codeandcode0x/traceandtrace-go
@@ -70,14 +78,14 @@ go get github.com/codeandcode0x/traceandtrace-go
 ### HTTP tracing
 
 Create a trace on the http request method side.
-![http to grpc client](wiki/imgs/http_client.jpg)
+![http to grpc client](wiki/imgs/http_client_2.jpg)
 tags are map[string]string type, you can pass logs k-v, tag and field.
 
 
 ### RPC tracing
 Create a trace on the rpc request method side
 
-- **client**
+**client**
 
 ```go
 import (
@@ -94,11 +102,11 @@ if err != nil {
 }
 ...
 ```
-- **server**
+**server**
 
 ```go
 import (
-    tracing "github.com/codeandcode0x/traceandtrace-go/wrapper/rpc"
+    tracing "github.com/codeandcode0x/traceandtrace-go"
 )
 
 //No need to request other rpc services
@@ -135,9 +143,9 @@ To call gRPC on the http server side, you need to add the parent context to the 
 - By context WithCancel() create sub-coroutine sessions and manage coroutine tasks ;
 - every context will carry related data of parent trace and child span ;
 
-![goroutine session](https://images2018.cnblogs.com/blog/1048291/201806/1048291-20180629074859717-1555813847.png)
+![goroutine session](wiki/imgs/goroutine.png)
 
-### trace job control
+### Trace Job Control
 start and end trace job
 
 ```go

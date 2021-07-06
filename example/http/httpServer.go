@@ -9,7 +9,7 @@ import (
 	"time"
 
 	tracing "github.com/codeandcode0x/traceandtrace-go"
-	pb "github.com/codeandcode0x/traceandtrace-go/example/helloworld/proto"
+	pb "github.com/codeandcode0x/traceandtrace-go/example/protos/helloworld"
 	"google.golang.org/grpc"
 )
 
@@ -20,8 +20,10 @@ func main() {
 // http to gRPC
 func httpServer() {
 	http.HandleFunc("/rpc/tracing", func(w http.ResponseWriter, r *http.Request) {
-		log.Println(".............. header ", r.Header)
-		pctx, cancel := tracing.AddHttpTracing("HttpServer", "/rpc/tracing GET", r.Header, map[string]string{"version": "v1"})
+		pctx, cancel := tracing.AddHttpTracing(
+			"HttpServer",
+			"/rpc/tracing GET", r.Header,
+			map[string]string{"version": "v1"})
 		defer cancel()
 		// rpc tracing
 		result := RpcClient(pctx)
@@ -33,7 +35,9 @@ func httpServer() {
 
 //grpc request
 func RpcClient(ptx context.Context) string {
-	rpcOption, closer := tracing.AddRpcClientTracing("RpcClient")
+	rpcOption, closer := tracing.AddRpcClientTracing(
+		"RpcClient",
+		map[string]string{"version": "v1"})
 	defer closer.Close()
 	address := "localhost:22530"
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), rpcOption)

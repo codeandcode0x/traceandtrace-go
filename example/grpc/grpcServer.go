@@ -32,7 +32,9 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 }
 
 func main() {
-	rpcOption, closer, _ := tracing.AddRpcServerTracing("RpcServer")
+	rpcOption, closer, _ := tracing.AddRpcServerTracing(
+		"RpcServer",
+		map[string]string{"version": "v1"})
 	defer closer.Close()
 
 	lis, err := net.Listen("tcp", port)
