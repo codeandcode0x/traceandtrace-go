@@ -79,7 +79,7 @@ go get github.com/codeandcode0x/traceandtrace-go
 ### HTTP tracing
 
 Create a trace on the http request method side.
-<img src="wiki/imgs/http_client_2.jpg" width="80%" alt="http to grpc client"><br>
+<img src="wiki/imgs/http_client_2.jpg" width="90%" alt="http to grpc client"><br>
 tags are map[string]string type, you can pass logs k-v, tag and field.
 
 
@@ -134,7 +134,7 @@ newRpcServiceReq(tracer)
 ```
 
 ### Http to gRPC tracing
-<img src="wiki/imgs/httptogrpc_client.jpg" width="80%" alt="http to grpc client"><br>
+<img src="wiki/imgs/httptogrpc_client.jpg" width="90%" alt="http to grpc client"><br>
 **ptx** is parent context, it can create sub-context trace span <br>
 To call gRPC on the http server side, you need to add the parent context to the gRPC client. For details, you can see the [example](example/http/httpServer.go) .
 
