@@ -171,6 +171,11 @@ for {
 }
 ```
 
+# Example
+- [Gin Tracing Middleware](https://github.com/codeandcode0x/istioAlltime/blob/main/projects/golang/ticket-manager/middleware/Tracing.go) 
+- [gRPC](example/grpc/grpcClient.go)
+- [Http to gRPC](example/http/httpServer.go)
+
 # Jaeger or Zipkin Tracing
 <img src="wiki/imgs/zipkin.jpg" width="100%" alt="tracing">
 
